@@ -3,14 +3,22 @@ Description=Sphinx Search - Fast standalone full-text SQL search engine
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/searchd --config /etc/sphinx/sphinx.conf
-ExecStop=/usr/bin/searchd --stop
-KillMode=process
-Restart=on-failure
-PIDFile=/var/run/sphinx/sphinx.pid
+Type=simple
 User=sphinx
 Group=sphinx
+# Run ExecStartPre with root-permissions
+PermissionsStartOnly=true
+# Run ExecStart with User=sphinx / Group=sphinx
+ExecStart=/usr/bin/searchd --config /etc/sphinx/sphinx.conf
+ExecStop=/usr/bin/searchd --config /etc/sphinx/sphinx.conf --stopwait
+KillMode=process
+KillSignal=SIGTERM
+SendSIGKILL=no
+LimitNOFILE=infinity
+TimeoutStartSec=infinity
+PIDFile=/var/run/sphinx/searchd.pid
 
 [Install]
 WantedBy=multi-user.target
 Alias=sphinx.service
+Alias=sphinxsearch.service
